@@ -1,0 +1,73 @@
+{% extends 'base.html' %}
+
+{% block title %}{% if action %}{{ action }}{% else %}Create{% endif %} CP Entry - Focused Life Tracker{% endblock %}
+
+{% block content %}
+<div class="max-w-2xl mx-auto">
+    <div class="mb-6">
+        <a href="{% url 'cp_tracker:list' %}" class="text-blue-600 hover:text-blue-800 font-semibold">← Back to CP Entries</a>
+    </div>
+
+    <div class="bg-white rounded-lg shadow-md p-8">
+        <h1 class="text-3xl font-bold text-gray-800 mb-8">{% if entry %}Update{% else %}Create{% endif %} CP Entry</h1>
+
+        <form method="post" class="space-y-6">
+            {% csrf_token %}
+
+            <div>
+                <label for="id_category" class="block text-gray-700 font-semibold mb-2">Category</label>
+                {{ form.category }}
+                {% if form.category.errors %}
+                    <p class="text-red-500 text-sm mt-1">{{ form.category.errors.0 }}</p>
+                {% endif %}
+            </div>
+
+            <div>
+                <label for="id_title" class="block text-gray-700 font-semibold mb-2">Title *</label>
+                {{ form.title }}
+                {% if form.title.errors %}
+                    <p class="text-red-500 text-sm mt-1">{{ form.title.errors.0 }}</p>
+                {% endif %}
+            </div>
+
+            <div>
+                <label for="id_description" class="block text-gray-700 font-semibold mb-2">Description</label>
+                {{ form.description }}
+                {% if form.description.errors %}
+                    <p class="text-red-500 text-sm mt-1">{{ form.description.errors.0 }}</p>
+                {% endif %}
+            </div>
+
+            <div>
+                <label for="id_progress" class="block text-gray-700 font-semibold mb-2">Progress: <span class="text-blue-600" id="progressValue">0</span>%</label>
+                {{ form.progress }}
+                {% if form.progress.errors %}
+                    <p class="text-red-500 text-sm mt-1">{{ form.progress.errors.0 }}</p>
+                {% endif %}
+                <script>
+                    document.getElementById('id_progress').addEventListener('input', function() {
+                        document.getElementById('progressValue').textContent = this.value;
+                    });
+                    if (document.getElementById('id_progress').value) {
+                        document.getElementById('progressValue').textContent = document.getElementById('id_progress').value;
+                    }
+                </script>
+            </div>
+
+            <div class="flex items-center gap-3">
+                <label for="id_completed" class="text-gray-700 font-semibold">{{ form.completed }}</label>
+                <span class="text-gray-600">Mark as completed</span>
+            </div>
+
+            <div class="flex gap-4">
+                <button type="submit" class="bg-blue-600 text-white px-6 py-3 rounded-lg font-semibold hover:bg-blue-700">
+                    {% if entry %}Update Entry{% else %}Create Entry{% endif %}
+                </button>
+                <a href="{% url 'cp_tracker:list' %}" class="bg-gray-400 text-white px-6 py-3 rounded-lg font-semibold hover:bg-gray-500">
+                    Cancel
+                </a>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

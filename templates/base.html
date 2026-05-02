@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Focused Life Tracker{% endblock %}</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-50">
+    <!-- Navigation -->
+    <nav class="bg-white shadow-md">
+        <div class="max-w-7xl mx-auto px-4 py-4 flex justify-between items-center">
+            <div class="flex items-center space-x-2">
+                <div class="text-2xl font-bold text-blue-600">🎯</div>
+                <a href="{% url 'dashboard:dashboard' %}" class="text-xl font-bold text-gray-800 hover:text-blue-600">
+                    Focused Life Tracker
+                </a>
+            </div>
+            
+            {% if user.is_authenticated %}
+            <div class="flex items-center space-x-6">
+                <a href="{% url 'dashboard:dashboard' %}" class="text-gray-700 hover:text-blue-600 font-medium">Dashboard</a>
+                <a href="{% url 'cp_tracker:list' %}" class="text-gray-700 hover:text-blue-600 font-medium">CP Tracker</a>
+                <a href="{% url 'deen_tracker:dashboard' %}" class="text-gray-700 hover:text-blue-600 font-medium">Deen</a>
+                <a href="{% url 'study_tracker:dashboard' %}" class="text-gray-700 hover:text-blue-600 font-medium">Study</a>
+                <div class="relative group">
+                    <button class="text-gray-700 hover:text-blue-600 font-medium">{{ user.username }} ▼</button>
+                    <div class="absolute right-0 mt-2 w-48 bg-white shadow-lg rounded-lg hidden group-hover:block z-50">
+                        <a href="{% url 'users:profile' %}" class="block px-4 py-2 text-gray-700 hover:bg-blue-100">Profile</a>
+                        <a href="{% url 'users:logout' %}" class="block px-4 py-2 text-gray-700 hover:bg-red-100 rounded-b-lg">Logout</a>
+                    </div>
+                </div>
+            </div>
+            {% else %}
+            <div class="flex items-center space-x-4">
+                <a href="{% url 'users:login' %}" class="text-gray-700 hover:text-blue-600 font-medium">Login</a>
+                <a href="{% url 'users:register' %}" class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700">Register</a>
+            </div>
+            {% endif %}
+        </div>
+    </nav>
+
+    <!-- Messages -->
+    {% if messages %}
+    <div class="max-w-7xl mx-auto px-4 py-4">
+        {% for message in messages %}
+        <div class="bg-{% if message.tags %}{{ message.tags }}{% else %}blue{% endif %}-100 border-l-4 border-{% if message.tags %}{{ message.tags }}{% else %}blue{% endif %}-500 text-{% if message.tags %}{{ message.tags }}{% else %}blue{% endif %}-700 p-4 mb-4 rounded">
+            <p>{{ message }}</p>
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+
+    <!-- Main Content -->
+    <main class="max-w-7xl mx-auto px-4 py-8">
+        {% block content %}{% endblock %}
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-gray-800 text-gray-300 mt-12 py-6">
+        <div class="max-w-7xl mx-auto px-4 text-center">
+            <p>&copy; 2026 Focused Life Tracker. Built with Django & Tailwind CSS.</p>
+        </div>
+    </footer>
+</body>
+</html>

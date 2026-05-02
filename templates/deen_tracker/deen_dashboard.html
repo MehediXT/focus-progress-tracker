@@ -1,0 +1,100 @@
+{% extends 'base.html' %}
+
+{% block title %}Deen Tracker Dashboard - Focused Life Tracker{% endblock %}
+
+{% block content %}
+<div class="mb-8">
+    <div class="flex items-center justify-between mb-4">
+        <div>
+            <h1 class="text-4xl font-bold text-gray-800">📿 Deen Tracker</h1>
+            <p class="text-gray-600 mt-2">Track your spiritual growth and Islamic practices.</p>
+        </div>
+        <div class="flex gap-3">
+            <a href="{% url 'deen_tracker:goals' %}" class="bg-green-600 text-white px-6 py-3 rounded-lg font-semibold hover:bg-green-700">
+                Goals
+            </a>
+            <a href="{% url 'deen_tracker:create' %}" class="bg-green-600 text-white px-6 py-3 rounded-lg font-semibold hover:bg-green-700">
+                + New Entry
+            </a>
+        </div>
+    </div>
+
+    <!-- Goals Section -->
+    <div class="bg-gradient-to-r from-green-500 to-green-600 text-white rounded-lg p-6 mb-8">
+        <h2 class="text-2xl font-bold mb-4">Your Deen Goals</h2>
+        {% if goal.daily_target or goal.weekly_target %}
+            <div class="grid grid-cols-2 gap-6">
+                {% if goal.daily_target %}
+                <div>
+                    <p class="text-green-100 text-sm font-semibold">Daily Goal</p>
+                    <p class="text-lg mt-1">{{ goal.daily_target }}</p>
+                </div>
+                {% endif %}
+                {% if goal.weekly_target %}
+                <div>
+                    <p class="text-green-100 text-sm font-semibold">Weekly Goal</p>
+                    <p class="text-lg mt-1">{{ goal.weekly_target }}</p>
+                </div>
+                {% endif %}
+            </div>
+        {% else %}
+            <p class="text-green-100">Set your deen goals to stay motivated! <a href="{% url 'deen_tracker:goals' %}" class="underline font-semibold">Set Goals</a></p>
+        {% endif %}
+    </div>
+
+    <!-- Activities Statistics -->
+    <div class="bg-white rounded-lg shadow-md p-6 mb-8">
+        <h2 class="text-xl font-bold text-gray-800 mb-4">Activity Statistics</h2>
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+            {% for activity, count in activities.items %}
+            <div class="bg-green-50 p-4 rounded-lg text-center">
+                <p class="text-2xl font-bold text-green-600">{{ count }}</p>
+                <p class="text-gray-700 text-sm font-semibold">{{ activity }}</p>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+
+<!-- Recent Entries -->
+<div class="bg-white rounded-lg shadow-md p-6">
+    <div class="flex items-center justify-between mb-6">
+        <h2 class="text-2xl font-bold text-gray-800">Recent Entries</h2>
+        <a href="{% url 'deen_tracker:create' %}" class="text-green-600 hover:text-green-800 font-semibold">+ New Entry</a>
+    </div>
+
+    <div class="space-y-4">
+        {% if entries %}
+            {% for entry in entries %}
+            <div class="border-l-4 border-green-500 p-4 bg-gray-50 rounded hover:bg-gray-100 transition">
+                <div class="flex items-start justify-between">
+                    <div class="flex-1">
+                        <a href="{% url 'deen_tracker:detail' entry.pk %}" class="text-lg font-bold text-gray-800 hover:text-green-600">{{ entry.title }}</a>
+                        <div class="flex items-center gap-3 mt-2 text-sm text-gray-600">
+                            <span class="bg-green-100 text-green-800 px-2 py-1 rounded font-semibold">{{ entry.get_activity_display }}</span>
+                            <span>📅 {{ entry.date }}</span>
+                            <span>⏱️ {{ entry.duration }} min</span>
+                        </div>
+                        {% if entry.reflection %}
+                        <p class="text-gray-700 mt-2 italic">{{ entry.reflection|truncatewords:15 }}</p>
+                        {% endif %}
+                    </div>
+                    <div class="flex gap-2 ml-4">
+                        <a href="{% url 'deen_tracker:update' entry.pk %}" class="bg-yellow-500 text-white px-3 py-1 rounded text-sm hover:bg-yellow-600">Edit</a>
+                        <form method="post" action="{% url 'deen_tracker:delete' entry.pk %}" style="display:inline;">
+                            {% csrf_token %}
+                            <button type="submit" class="bg-red-500 text-white px-3 py-1 rounded text-sm hover:bg-red-600" onclick="return confirm('Are you sure?')">Delete</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        {% else %}
+            <div class="text-center py-8 bg-gray-50 rounded">
+                <p class="text-gray-600 mb-4">No deen entries yet. Start tracking your spiritual journey!</p>
+                <a href="{% url 'deen_tracker:create' %}" class="bg-green-600 text-white px-6 py-2 rounded-lg font-semibold hover:bg-green-700">Create First Entry</a>
+            </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

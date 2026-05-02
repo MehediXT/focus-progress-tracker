@@ -1,0 +1,288 @@
+{% extends 'base.html' %}
+
+{% block title %}Dashboard - Focused Life Tracker{% endblock %}
+
+{% block content %}
+<div class="mb-8">
+    <h1 class="text-4xl font-bold text-gray-800 mb-2">Welcome back, {{ user.first_name|default:user.username }}! 👋</h1>
+    <p class="text-gray-600">Track your progress across all areas of your focused life.</p>
+</div>
+
+<!-- Stats Overview -->
+<div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
+    <!-- CP Tracker Stats -->
+    <div class="bg-white rounded-lg shadow-md p-6 border-l-4 border-blue-500">
+        <div class="flex items-center justify-between">
+            <div>
+                <p class="text-gray-600 text-sm font-semibold">CP Tracker</p>
+                <p class="text-3xl font-bold text-gray-800 mt-2">{{ cp_total }}</p>
+                <p class="text-gray-500 text-sm mt-1">Total Entries</p>
+            </div>
+            <div class="text-4xl">📊</div>
+        </div>
+        <a href="{% url 'cp_tracker:list' %}" class="text-blue-600 hover:text-blue-800 font-medium text-sm mt-4 inline-block">View Details →</a>
+    </div>
+
+    <!-- Deen Tracker Stats -->
+    <div class="bg-white rounded-lg shadow-md p-6 border-l-4 border-green-500">
+        <div class="flex items-center justify-between">
+            <div>
+                <p class="text-gray-600 text-sm font-semibold">Deen Tracker</p>
+                <p class="text-3xl font-bold text-gray-800 mt-2">{{ deen_total }}</p>
+                <p class="text-gray-500 text-sm mt-1">Total Entries</p>
+            </div>
+            <div class="text-4xl">📿</div>
+        </div>
+        <a href="{% url 'deen_tracker:dashboard' %}" class="text-green-600 hover:text-green-800 font-medium text-sm mt-4 inline-block">View Details →</a>
+    </div>
+
+    <!-- Study Tracker Stats -->
+    <div class="bg-white rounded-lg shadow-md p-6 border-l-4 border-purple-500">
+        <div class="flex items-center justify-between">
+            <div>
+                <p class="text-gray-600 text-sm font-semibold">Study Tracker</p>
+                <p class="text-3xl font-bold text-gray-800 mt-2">{{ study_total }}</p>
+                <p class="text-gray-500 text-sm mt-1">Total Entries</p>
+            </div>
+            <div class="text-4xl">📚</div>
+        </div>
+        <a href="{% url 'study_tracker:dashboard' %}" class="text-purple-600 hover:text-purple-800 font-medium text-sm mt-4 inline-block">View Details →</a>
+    </div>
+</div>
+
+<!-- Recent Entries -->
+<div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+    <!-- Recent CP Entries -->
+    <div class="bg-white rounded-lg shadow-md p-6">
+        <div class="flex items-center justify-between mb-4">
+            <h2 class="text-xl font-bold text-gray-800">Recent CP Entries</h2>
+            <a href="{% url 'cp_tracker:create' %}" class="text-blue-600 hover:text-blue-800 text-sm font-semibold">+ New Entry</a>
+        </div>
+        <div class="space-y-3">
+            {% if cp_entries %}
+                {% for entry in cp_entries %}
+                <div class="border-l-4 border-blue-500 p-3 bg-gray-50 rounded hover:bg-gray-100">
+                    <a href="{% url 'cp_tracker:detail' entry.pk %}" class="font-semibold text-gray-800 hover:text-blue-600">{{ entry.title }}</a>
+                    <div class="flex items-center justify-between mt-1">
+                        <span class="text-sm text-gray-600">{{ entry.get_category_display }}</span>
+                        <span class="text-sm font-semibold text-gray-700">{{ entry.progress }}%</span>
+                    </div>
+                </div>
+                {% endfor %}
+            {% else %}
+                <p class="text-gray-600 text-center py-4">No entries yet. <a href="{% url 'cp_tracker:create' %}" class="text-blue-600 hover:text-blue-800 font-semibold">Create one</a></p>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Recent Deen Entries -->
+    <div class="bg-white rounded-lg shadow-md p-6">
+        <div class="flex items-center justify-between mb-4">
+            <h2 class="text-xl font-bold text-gray-800">Recent Deen Entries</h2>
+            <a href="{% url 'deen_tracker:create' %}" class="text-green-600 hover:text-green-800 text-sm font-semibold">+ New Entry</a>
+        </div>
+        <div class="space-y-3">
+            {% if deen_entries %}
+                {% for entry in deen_entries %}
+                <div class="border-l-4 border-green-500 p-3 bg-gray-50 rounded hover:bg-gray-100">
+                    <a href="{% url 'deen_tracker:detail' entry.pk %}" class="font-semibold text-gray-800 hover:text-green-600">{{ entry.title }}</a>
+                    <div class="flex items-center justify-between mt-1">
+                        <span class="text-sm text-gray-600">{{ entry.get_activity_display }}</span>
+                        <span class="text-sm font-semibold text-gray-700">{{ entry.duration }} min</span>
+                    </div>
+                </div>
+                {% endfor %}
+            {% else %}
+                <p class="text-gray-600 text-center py-4">No entries yet. <a href="{% url 'deen_tracker:create' %}" class="text-green-600 hover:text-green-800 font-semibold">Create one</a></p>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<!-- Stopwatch & Todo List Section -->
+<div class="grid grid-cols-1 lg:grid-cols-2 gap-8 my-12">
+    <!-- Stopwatch Widget -->
+    <div class="bg-gradient-to-br from-indigo-500 to-indigo-600 rounded-lg shadow-lg p-8 text-white">
+        <div class="text-center">
+            <h2 class="text-2xl font-bold mb-2">⏱️ Stopwatch</h2>
+            <p class="text-indigo-100 text-sm mb-6">Quick time tracker for activities</p>
+            
+            <!-- Display -->
+            <div class="bg-indigo-900 rounded-lg p-6 mb-6">
+                <div class="text-5xl font-mono font-bold tracking-wider" id="stopwatch-display">00:00:00</div>
+                <div class="text-sm text-indigo-200 mt-2">HH:MM:SS</div>
+            </div>
+            
+            <!-- Controls -->
+            <div class="flex gap-3 justify-center">
+                <button onclick="startStopwatch()" id="start-btn" class="bg-white text-indigo-600 px-6 py-2 rounded-lg font-semibold hover:bg-indigo-100 transition">Start</button>
+                <button onclick="pauseStopwatch()" id="pause-btn" class="bg-white text-indigo-600 px-6 py-2 rounded-lg font-semibold hover:bg-indigo-100 transition opacity-50 cursor-not-allowed" disabled>Pause</button>
+                <button onclick="resetStopwatch()" class="bg-red-500 px-4 py-2 rounded-lg font-semibold hover:bg-red-600 transition text-white">Reset</button>
+            </div>
+            
+            <!-- Quick Save Button -->
+            <button onclick="saveStopwatchToCP()" class="w-full mt-4 bg-green-500 text-white px-4 py-2 rounded-lg font-semibold hover:bg-green-600 transition">
+                💾 Save to CP Tracker
+            </button>
+        </div>
+    </div>
+
+    <!-- Todo List Widget -->
+    <div class="bg-white rounded-lg shadow-md p-6">
+        <div class="flex items-center justify-between mb-4">
+            <h2 class="text-xl font-bold text-gray-800">📝 Quick Todo List</h2>
+            <span class="bg-blue-100 text-blue-800 text-sm font-semibold px-3 py-1 rounded-full">{{ todos.count }} Active</span>
+        </div>
+        
+        <!-- Add Todo Form -->
+        <form method="post" class="mb-6">
+            {% csrf_token %}
+            <div class="flex gap-2 mb-4">
+                <input type="text" name="title" placeholder="Add a new task..." class="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" required>
+                <button type="submit" class="bg-blue-600 text-white px-4 py-2 rounded-lg font-semibold hover:bg-blue-700 transition">+ Add</button>
+            </div>
+        </form>
+
+        <!-- Active Todos -->
+        <div class="space-y-2 mb-4">
+            {% if todos %}
+                {% for todo in todos %}
+                <div class="flex items-center gap-3 p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition group" id="todo-{{ todo.id }}">
+                    <input type="checkbox" class="w-5 h-5 text-green-600 rounded cursor-pointer" onchange="toggleTodo({{ todo.id }})">
+                    <span class="flex-1 text-gray-800">{{ todo.title }}</span>
+                    <button onclick="deleteTodo({{ todo.id }})" class="text-red-500 hover:text-red-700 opacity-0 group-hover:opacity-100 transition" title="Delete">✕</button>
+                </div>
+                {% endfor %}
+            {% else %}
+                <p class="text-gray-500 text-center py-4 text-sm">No tasks yet. Add one to get started! 🎯</p>
+            {% endif %}
+        </div>
+
+        <!-- Completed Todos Count -->
+        {% if completed_todos > 0 %}
+        <div class="border-t pt-3 text-sm text-gray-600">
+            <span class="font-semibold text-green-600">✓ {{ completed_todos }}</span> task{{ completed_todos|pluralize }} completed
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+<!-- Quick Action Buttons -->
+<div class="mt-12 bg-gradient-to-r from-blue-600 to-blue-700 rounded-lg shadow-lg p-8 text-white text-center">
+    <h3 class="text-2xl font-bold mb-4">Ready to start tracking?</h3>
+    <div class="flex flex-wrap gap-4 justify-center">
+        <a href="{% url 'cp_tracker:create' %}" class="bg-white text-blue-600 px-6 py-2 rounded-lg font-semibold hover:bg-gray-100 transition">CP Entry</a>
+        <a href="{% url 'deen_tracker:create' %}" class="bg-white text-blue-600 px-6 py-2 rounded-lg font-semibold hover:bg-gray-100 transition">Deen Entry</a>
+        <a href="{% url 'study_tracker:create' %}" class="bg-white text-blue-600 px-6 py-2 rounded-lg font-semibold hover:bg-gray-100 transition">Study Entry</a>
+    </div>
+</div>
+
+<!-- Stopwatch & Todo Scripts -->
+<script>
+let stopwatchRunning = false;
+let stopwatchSeconds = 0;
+let stopwatchInterval = null;
+
+function formatTime(seconds) {
+    const hours = Math.floor(seconds / 3600);
+    const minutes = Math.floor((seconds % 3600) / 60);
+    const secs = seconds % 60;
+    return `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
+}
+
+function updateStopwatchDisplay() {
+    document.getElementById('stopwatch-display').textContent = formatTime(stopwatchSeconds);
+}
+
+function startStopwatch() {
+    if (!stopwatchRunning) {
+        stopwatchRunning = true;
+        document.getElementById('start-btn').disabled = true;
+        document.getElementById('start-btn').classList.add('opacity-50', 'cursor-not-allowed');
+        document.getElementById('pause-btn').disabled = false;
+        document.getElementById('pause-btn').classList.remove('opacity-50', 'cursor-not-allowed');
+        
+        stopwatchInterval = setInterval(() => {
+            stopwatchSeconds++;
+            updateStopwatchDisplay();
+        }, 1000);
+    }
+}
+
+function pauseStopwatch() {
+    if (stopwatchRunning) {
+        stopwatchRunning = false;
+        clearInterval(stopwatchInterval);
+        document.getElementById('start-btn').disabled = false;
+        document.getElementById('start-btn').classList.remove('opacity-50', 'cursor-not-allowed');
+        document.getElementById('pause-btn').disabled = true;
+        document.getElementById('pause-btn').classList.add('opacity-50', 'cursor-not-allowed');
+    }
+}
+
+function resetStopwatch() {
+    pauseStopwatch();
+    stopwatchSeconds = 0;
+    updateStopwatchDisplay();
+    document.getElementById('start-btn').disabled = false;
+    document.getElementById('start-btn').classList.remove('opacity-50', 'cursor-not-allowed');
+}
+
+function saveStopwatchToCP() {
+    if (stopwatchSeconds > 0) {
+        const minutes = Math.ceil(stopwatchSeconds / 60);
+        const title = prompt('Enter activity name:', 'Quick Activity');
+        if (title) {
+            // Redirect to CP create with pre-filled data (if API supports)
+            alert(`Activity "${title}" tracked for ${minutes} minutes!\n\nRedirecting to CP Tracker...`);
+            window.location.href = `{% url 'cp_tracker:create' %}`;
+        }
+    } else {
+        alert('Please start and run the stopwatch first!');
+    }
+}
+
+// Todo Functions
+function toggleTodo(todoId) {
+    fetch(`/dashboard/todo/${todoId}/toggle/`, {
+        method: 'POST',
+        headers: {
+            'X-Requested-With': 'XMLHttpRequest',
+            'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            const todoElement = document.getElementById(`todo-${todoId}`);
+            todoElement.style.opacity = '0.6';
+            todoElement.style.textDecoration = 'line-through';
+            setTimeout(() => {
+                location.reload();
+            }, 500);
+        }
+    })
+    .catch(error => console.error('Error:', error));
+}
+
+function deleteTodo(todoId) {
+    if (confirm('Delete this task?')) {
+        fetch(`/dashboard/todo/${todoId}/delete/`, {
+            method: 'POST',
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest',
+                'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                document.getElementById(`todo-${todoId}`).remove();
+                location.reload();
+            }
+        })
+        .catch(error => console.error('Error:', error));
+    }
+}
+</script>
+{% endblock %}

@@ -1,0 +1,115 @@
+{% extends 'base.html' %}
+
+{% block title %}Study Tracker Dashboard - Focused Life Tracker{% endblock %}
+
+{% block content %}
+<div class="mb-8">
+    <div class="flex items-center justify-between mb-4">
+        <div>
+            <h1 class="text-4xl font-bold text-gray-800">📚 Study Tracker</h1>
+            <p class="text-gray-600 mt-2">Track your academic and self-study progress.</p>
+        </div>
+        <div class="flex gap-3">
+            <a href="{% url 'study_tracker:subject_create' %}" class="bg-purple-600 text-white px-4 py-3 rounded-lg font-semibold hover:bg-purple-700">
+                + Subject
+            </a>
+            <a href="{% url 'study_tracker:goals' %}" class="bg-purple-600 text-white px-4 py-3 rounded-lg font-semibold hover:bg-purple-700">
+                Goals
+            </a>
+            <a href="{% url 'study_tracker:create' %}" class="bg-purple-600 text-white px-6 py-3 rounded-lg font-semibold hover:bg-purple-700">
+                + Study Entry
+            </a>
+        </div>
+    </div>
+
+    <!-- Study Stats -->
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+        <div class="bg-gradient-to-br from-purple-500 to-purple-600 text-white rounded-lg p-6">
+            <p class="text-purple-100 text-sm font-semibold">Total Study Time</p>
+            <p class="text-4xl font-bold mt-2">{{ total_hours }}h</p>
+            <p class="text-sm text-purple-100 mt-1">{{ total_minutes }} minutes</p>
+        </div>
+        <div class="bg-gradient-to-br from-blue-500 to-blue-600 text-white rounded-lg p-6">
+            <p class="text-blue-100 text-sm font-semibold">Daily Target</p>
+            <p class="text-3xl font-bold mt-2">{{ goal.daily_minutes }}m</p>
+        </div>
+        <div class="bg-gradient-to-br from-green-500 to-green-600 text-white rounded-lg p-6">
+            <p class="text-green-100 text-sm font-semibold">Weekly Target</p>
+            <p class="text-3xl font-bold mt-2">{{ goal.weekly_minutes }}m</p>
+        </div>
+    </div>
+
+    <!-- Subjects -->
+    <div class="bg-white rounded-lg shadow-md p-6 mb-8">
+        <div class="flex items-center justify-between mb-4">
+            <h2 class="text-xl font-bold text-gray-800">Your Subjects</h2>
+            <a href="{% url 'study_tracker:subject_create' %}" class="text-purple-600 hover:text-purple-800 font-semibold">+ Add Subject</a>
+        </div>
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+            {% if subjects %}
+                {% for subject in subjects %}
+                <div class="p-4 rounded-lg text-white font-semibold text-center" style="background-color: {{ subject.color }}">
+                    <p class="text-lg">{{ subject.name }}</p>
+                    <p class="text-sm opacity-90 mt-1">{{ subject.entries.count }} entries</p>
+                    <div class="flex gap-2 mt-3 text-xs justify-center">
+                        <a href="{% url 'study_tracker:subject_update' subject.pk %}" class="bg-white text-gray-800 px-2 py-1 rounded hover:bg-gray-100">Edit</a>
+                        <form method="post" action="{% url 'study_tracker:subject_delete' subject.pk %}" style="display:inline;">
+                            {% csrf_token %}
+                            <button type="submit" class="bg-red-500 px-2 py-1 rounded hover:bg-red-600" onclick="return confirm('Delete subject and all entries?')">Delete</button>
+                        </form>
+                    </div>
+                </div>
+                {% endfor %}
+            {% else %}
+                <div class="col-span-full text-center py-8">
+                    <p class="text-gray-600 mb-4">No subjects yet. Create one to get started!</p>
+                    <a href="{% url 'study_tracker:subject_create' %}" class="bg-purple-600 text-white px-6 py-2 rounded-lg font-semibold hover:bg-purple-700">Create Subject</a>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<!-- Recent Entries -->
+<div class="bg-white rounded-lg shadow-md p-6">
+    <div class="flex items-center justify-between mb-6">
+        <h2 class="text-2xl font-bold text-gray-800">Recent Study Sessions</h2>
+        <a href="{% url 'study_tracker:create' %}" class="text-purple-600 hover:text-purple-800 font-semibold">+ New Entry</a>
+    </div>
+
+    <div class="space-y-4">
+        {% if entries %}
+            {% for entry in entries %}
+            <div class="border-l-4 p-4 bg-gray-50 rounded hover:bg-gray-100 transition" style="border-left-color: {{ entry.subject.color }}">
+                <div class="flex items-start justify-between">
+                    <div class="flex-1">
+                        <a href="{% url 'study_tracker:detail' entry.pk %}" class="text-lg font-bold text-gray-800 hover:text-purple-600">{{ entry.topic }}</a>
+                        <div class="flex items-center gap-3 mt-2 text-sm text-gray-600">
+                            <span class="font-semibold text-gray-800" style="color: {{ entry.subject.color }}">{{ entry.subject.name }}</span>
+                            <span>📅 {{ entry.date }}</span>
+                            <span>⏱️ {{ entry.duration }} min</span>
+                            <span class="bg-gray-200 text-gray-700 px-2 py-1 rounded capitalize">{{ entry.get_difficulty_display }}</span>
+                        </div>
+                        {% if entry.notes %}
+                        <p class="text-gray-700 mt-2">{{ entry.notes|truncatewords:15 }}</p>
+                        {% endif %}
+                    </div>
+                    <div class="flex gap-2 ml-4">
+                        <a href="{% url 'study_tracker:update' entry.pk %}" class="bg-yellow-500 text-white px-3 py-1 rounded text-sm hover:bg-yellow-600">Edit</a>
+                        <form method="post" action="{% url 'study_tracker:delete' entry.pk %}" style="display:inline;">
+                            {% csrf_token %}
+                            <button type="submit" class="bg-red-500 text-white px-3 py-1 rounded text-sm hover:bg-red-600" onclick="return confirm('Are you sure?')">Delete</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        {% else %}
+            <div class="text-center py-8 bg-gray-50 rounded">
+                <p class="text-gray-600 mb-4">No study entries yet. Start tracking your study sessions!</p>
+                <a href="{% url 'study_tracker:create' %}" class="bg-purple-600 text-white px-6 py-2 rounded-lg font-semibold hover:bg-purple-700">Create First Entry</a>
+            </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}
