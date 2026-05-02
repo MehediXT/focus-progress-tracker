@@ -8,3 +8,5 @@ urlpatterns = [
     path('todo/<int:todo_id>/toggle/', toggle_todo, name='toggle_todo'),
     path('todo/<int:todo_id>/delete/', delete_todo, name='delete_todo'),
 ]
+
+#hello 
